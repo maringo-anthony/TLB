@@ -4,7 +4,13 @@
 // this is gonna be gr8.
 
 /** invalidate all cache lines in the TLB */
-void tlb_clear();
+void tlb_clear()
+{
+    /* for each set in cache
+         for each block in set
+            block.validBit = 0
+    */
+}
 
 /**
  * return 0 if this virtual address does not have a valid
