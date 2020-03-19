@@ -12,7 +12,18 @@ void tlb_clear();
  * if it is the most-recently used, 2 if the next-to-most,
  * etc.
  */
-int tlb_peek(size_t va);
+int tlb_peek(size_t va)
+{
+    /*
+        use mlpt translate function to get the physical address
+        then go to the set in the cache given by the physical address
+        iterate through the set to see if any of the tags match
+            if(tags match)
+                return LRU status(not sure how to find LRU status)
+            else
+                return 0
+    */
+}
 
 /**
  * If this virtual address is in the TLB, return its
@@ -27,7 +38,7 @@ int tlb_peek(size_t va);
 size_t tlb_translate(size_t va);
 
 /** stub for the purpose of testing tlb_* functions */
-size_t translate(va) { return va < 0x1234000 ? va + 0x20000 : -1; }
+size_t translate(size_t va) { return va < 0x1234000 ? va + 0x20000 : -1; }
 
 /**
  * Tests given on the assignment description
