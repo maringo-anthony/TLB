@@ -1,7 +1,12 @@
 #include <stdlib.h>
 #include "tlb.h"
+#define WAYS 4
+#define SETS 16
 
 // this is gonna be gr8.
+
+// todo need to init this with arrays
+void *cache[SETS];
 
 /** invalidate all cache lines in the TLB */
 void tlb_clear();
@@ -27,7 +32,7 @@ int tlb_peek(size_t va);
 size_t tlb_translate(size_t va);
 
 /** stub for the purpose of testing tlb_* functions */
-size_t translate(va) { return va < 0x1234000 ? va + 0x20000 : -1; }
+size_t translate(size_t va) { return va < 0x1234000 ? va + 0x20000 : -1; }
 
 /**
  * Tests given on the assignment description
