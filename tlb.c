@@ -26,6 +26,9 @@ int tlb_peek(size_t va);
  */
 size_t tlb_translate(size_t va);
 
+/** stub for the purpose of testing tlb_* functions */
+size_t translate(va) { return va < 0x1234000 ? va + 0x20000 : -1; }
+
 /**
  * Tests given on the assignment description
  */
