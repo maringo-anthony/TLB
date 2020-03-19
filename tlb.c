@@ -24,7 +24,24 @@ int tlb_peek(size_t va);
  * As an exception, if translate(va) returns -1, do not
  * update the TLB: just return -1.
  */
-size_t tlb_translate(size_t va);
+size_t tlb_translate(size_t va)
+{
+    /*
+        go to the set in the cache given by the virtual address
+        iterate through the set to see if any of the tags match
+            if(tags match)
+                make the cache line the most recently used
+                return the physical address (not exactly sure how to do that)
+            else
+                if(use translate from mlpt to get a physical address != -1)
+                    put the new physical address into the cache
+                    make the added cache line the most recently used
+                    return the new physical address
+                else
+                    return -1
+
+    */
+}
 
 /** stub for the purpose of testing tlb_* functions */
 size_t translate(va) { return va < 0x1234000 ? va + 0x20000 : -1; }
