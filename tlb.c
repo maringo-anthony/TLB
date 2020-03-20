@@ -1,10 +1,34 @@
 #include <stdlib.h>
 #include "tlb.h"
+#define WAYS 4
+#define SETS 16
 
 // this is gonna be gr8.
 
+// data structure to use in the cache
+typedef struct CacheLine
+{
+    int validBit;
+    int lruPos;
+    size_t physicalAddr;
+} CacheLine;
+
+CacheLine *cache[SETS][WAYS];
+
 /** invalidate all cache lines in the TLB */
-void tlb_clear();
+void tlb_clear()
+{
+    for (int i = 0; i < SETS; i++)
+    {
+        for (int j = 0; j < WAYS; j++)
+        {
+            if (cache[i][j] != NULL)
+            {
+                cache[i][j]->validBit = 0;
+            }
+        }
+    }
+}
 
 /**
  * return 0 if this virtual address does not have a valid
