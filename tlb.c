@@ -4,7 +4,6 @@
 #define SETS 16
 
 // this is gonna be gr8.
-void *cache[SETS][WAYS];
 
 // data structure to use in the cache
 typedef struct CacheLine
@@ -14,13 +13,21 @@ typedef struct CacheLine
     size_t physicalAddr;
 } CacheLine;
 
+CacheLine *cache[SETS][WAYS];
+
 /** invalidate all cache lines in the TLB */
 void tlb_clear()
 {
-    /* for each set in cache
-         for each block in set
-            block.validBit = 0
-    */
+    for (int i = 0; i < SETS; i++)
+    {
+        for (int j = 0; j < WAYS; j++)
+        {
+            if (cache[i][j] != NULL)
+            {
+                cache[i][j]->validBit = 0;
+            }
+        }
+    }
 }
 
 /**
