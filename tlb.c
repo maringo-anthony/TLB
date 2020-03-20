@@ -72,33 +72,7 @@ int tlb_peek(size_t va)
         }
     }
 
-    // BRUTE FORCE WAY THEY DONT WANT US DOING IT LIKE THIS BUT IT SHOULD STILL WORK
-    // might break if it should have the same tag, but not the same exact physical address
-    // size_t physicalAddr = translate(va);
-    // for (int i = 0; i < SETS; i++)
-    // {
-    //     for (int j = 0; j < WAYS; j++)
-    //     {
-    //         // if the CacheLine in the TLB is valid and has the same physical addr
-    //         if (cache[i][j] != NULL && cache[i][j]->validBit != 0 && cache[i][j]->physicalAddr == physicalAddr)
-    //         {
-    //             return cache[i][j]->lruPos;
-    //         }
-    //     }
-    // }
-
     return 0;
-
-    /*
-        if the dumb solution above does not cut it, this might be the better way?
-        use mlpt translate function to get the physical address
-        then go to the set in the cache given by the physical address
-        iterate through the set to see if any of the tags match
-            if(tags match)
-                return LRU status(not sure how to find LRU status)
-            else
-                return 0
-    */
 }
 
 /**
