@@ -1,7 +1,18 @@
 #include <stdlib.h>
 #include "tlb.h"
+#define WAYS 4
+#define SETS 16
 
 // this is gonna be gr8.
+void *cache[SETS][WAYS];
+
+// data structure to use in the cache
+typedef struct CacheLine
+{
+    int validBit;
+    int lruPos;
+    size_t physicalAddr;
+} CacheLine;
 
 /** invalidate all cache lines in the TLB */
 void tlb_clear();
