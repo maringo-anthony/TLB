@@ -4,9 +4,15 @@
 #define SETS 16
 
 // this is gonna be gr8.
+void *cache[SETS][WAYS];
 
-// todo need to init this with arrays
-void *cache[SETS];
+// data structure to use in the cache
+typedef struct CacheLine
+{
+    int validBit;
+    int lruPos;
+    size_t physicalAddr;
+} CacheLine;
 
 /** invalidate all cache lines in the TLB */
 void tlb_clear();
