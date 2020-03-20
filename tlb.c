@@ -197,8 +197,6 @@ size_t tlb_translate(size_t va)
     else
         return -1;
 
-    // TODO update all other LRU numbers
-
     return physicalAddr;
 }
 
