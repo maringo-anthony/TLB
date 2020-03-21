@@ -157,10 +157,12 @@ size_t tlb_translate(size_t va)
             }
         }
         // replace the LRU cache line with the new cache line
+        printf("Trying to replace LRU cache line with new cache line...\n");
         for (int i = 0; i < WAYS; i++)
         {
             if (cache[setIndex][i] == lruCacheLine)
             {
+                printf("Replaced LRU cache line\n");
                 cache[setIndex][i] = newCacheLine;
                 break;
             }
@@ -191,7 +193,9 @@ int main()
 {
     tlb_clear();
     assert(tlb_peek(0) == 0);
-    assert(tlb_translate(0) == 0x20000);
+    assert(tlb_translate(0) == 0x20000); // works up to here
+    printf("tlb_peek(0) returns: %d \n", tlb_peek(0));
+    printf("tlb_peek(0) returns: %d \n", tlb_peek(0));
     assert(tlb_peek(0) == 1);
     assert(tlb_translate(0x200) == 0x20200);
     assert(tlb_peek(0) == 1);
