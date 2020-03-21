@@ -103,6 +103,7 @@ size_t tlb_translate(size_t va)
 
     size_t blockOffSet = va & ~((0xFFFFFFFFFFFFFFFF >> numBOBits) << numBOBits);
 
+    // if the VA is in the cache return its physical address
     for (int i = 0; i < WAYS; i++)
     {
         if (cache[setIndex][i] != NULL && cache[setIndex][i]->tag == tag && cache[setIndex][i]->validBit == 1)
@@ -123,7 +124,7 @@ size_t tlb_translate(size_t va)
         }
     }
 
-    // if it wasnt int the TLB look it up then add it to the TLB
+    // if it wasnt in the TLB look it up then add it to the TLB
     size_t physicalAddr = translate(va);
     if (physicalAddr != -1)
     {
@@ -175,4 +176,4 @@ size_t tlb_translate(size_t va)
 }
 
 /** stub for the purpose of testing tlb_* functions */
-size_t translate(size_t va) { return va < 0x1234000 ? va + 0x20000 : -1; }
+//size_t translate(size_t va) { return va < 0x1234000 ? va + 0x20000 : -1; }
