@@ -142,27 +142,32 @@ size_t tlb_translate(size_t va)
 
         // add the new cache line to the cache and evict something the LRU cache line
 
+        // TODO get the correct LRU cache line
         // find the LRU cache line
         for (int i = 0; i < WAYS; i++)
         {
+            // if it hasnt been set, just set it to the first thing
             if (lruCacheLine == NULL)
             {
-                cache[setIndex][i] = lruCacheLine;
+                lruCacheLine = cache[setIndex][i];
             }
+            // if there is a cache line that hasnt been used, no need to evict anything else
             if (cache[setIndex][i] == NULL)
-                continue;
-
+            {
+                lruCacheLine = cache[setIndex][i];
+                break;
+            }
+            // if we find another cache line that has a greater LRU , choose that one instead to evict
+            else if (cache[setIndex][i]->lruPos > lruCacheLine->lruPos)
             {
                 lruCacheLine = cache[setIndex][i];
             }
         }
         // replace the LRU cache line with the new cache line
-        printf("Trying to replace LRU cache line with new cache line...\n");
         for (int i = 0; i < WAYS; i++)
         {
             if (cache[setIndex][i] == lruCacheLine)
             {
-                printf("Replaced LRU cache line\n");
                 cache[setIndex][i] = newCacheLine;
                 break;
             }
@@ -194,8 +199,6 @@ int main()
     tlb_clear();
     assert(tlb_peek(0) == 0);
     assert(tlb_translate(0) == 0x20000); // works up to here
-    printf("tlb_peek(0) returns: %d \n", tlb_peek(0));
-    printf("tlb_peek(0) returns: %d \n", tlb_peek(0));
     assert(tlb_peek(0) == 1);
     assert(tlb_translate(0x200) == 0x20200);
     assert(tlb_peek(0) == 1);
