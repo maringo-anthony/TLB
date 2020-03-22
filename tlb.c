@@ -1,5 +1,7 @@
 #include <stdlib.h>
 #include <math.h>
+#include <assert.h>
+#include <stdio.h>
 #include "tlb.h"
 #define WAYS 4
 #define SETS 16
@@ -72,33 +74,7 @@ int tlb_peek(size_t va)
         }
     }
 
-    // BRUTE FORCE WAY THEY DONT WANT US DOING IT LIKE THIS BUT IT SHOULD STILL WORK
-    // might break if it should have the same tag, but not the same exact physical address
-    // size_t physicalAddr = translate(va);
-    // for (int i = 0; i < SETS; i++)
-    // {
-    //     for (int j = 0; j < WAYS; j++)
-    //     {
-    //         // if the CacheLine in the TLB is valid and has the same physical addr
-    //         if (cache[i][j] != NULL && cache[i][j]->validBit != 0 && cache[i][j]->physicalAddr == physicalAddr)
-    //         {
-    //             return cache[i][j]->lruPos;
-    //         }
-    //     }
-    // }
-
     return 0;
-
-    /*
-        if the dumb solution above does not cut it, this might be the better way?
-        use mlpt translate function to get the physical address
-        then go to the set in the cache given by the physical address
-        iterate through the set to see if any of the tags match
-            if(tags match)
-                return LRU status(not sure how to find LRU status)
-            else
-                return 0
-    */
 }
 
 /**
@@ -129,6 +105,7 @@ size_t tlb_translate(size_t va)
 
     size_t blockOffSet = va & ~((0xFFFFFFFFFFFFFFFF >> numBOBits) << numBOBits);
 
+    // if the VA is in the cache return its physical address
     for (int i = 0; i < WAYS; i++)
     {
         if (cache[setIndex][i] != NULL && cache[setIndex][i]->tag == tag && cache[setIndex][i]->validBit == 1)
@@ -149,11 +126,17 @@ size_t tlb_translate(size_t va)
         }
     }
 
-    // if it wasnt int the TLB look it up then add it to the TLB
+    // if it wasnt in the TLB look it up then add it to the TLB
     size_t physicalAddr = translate(va);
     if (physicalAddr != -1)
     {
-        CacheLine *newCacheLine = {1, 1, physicalAddr, tag, setIndex, blockOffSet};
+        CacheLine *newCacheLine = malloc(sizeof(CacheLine));
+        newCacheLine->validBit = 1;
+        newCacheLine->lruPos = 1;
+        newCacheLine->physicalAddr = physicalAddr;
+        newCacheLine->tag = tag;
+        newCacheLine->setIndex = setIndex;
+        newCacheLine->blockOffset = blockOffSet;
 
         CacheLine *lruCacheLine = NULL;
 
@@ -166,17 +149,20 @@ size_t tlb_translate(size_t va)
             {
                 cache[setIndex][i] = lruCacheLine;
             }
-            if (cache[setIndex][i]->lruPos > lruCacheLine->lruPos)
+            if (cache[setIndex][i] == NULL)
+                continue;
+
             {
                 lruCacheLine = cache[setIndex][i];
             }
         }
-
         // replace the LRU cache line with the new cache line
+        printf("Trying to replace LRU cache line with new cache line...\n");
         for (int i = 0; i < WAYS; i++)
         {
             if (cache[setIndex][i] == lruCacheLine)
             {
+                printf("Replaced LRU cache line\n");
                 cache[setIndex][i] = newCacheLine;
                 break;
             }
@@ -203,45 +189,43 @@ size_t tlb_translate(size_t va)
 /** stub for the purpose of testing tlb_* functions */
 size_t translate(size_t va) { return va < 0x1234000 ? va + 0x20000 : -1; }
 
-/**
- * Tests given on the assignment description
- */
 int main()
 {
-
-    // tlb_clear();
-    // assert(tlb_peek(0) == 0);
-    // assert(tlb_translate(0) == 0x20000);
-    // assert(tlb_peek(0) == 1);
-    // assert(tlb_translate(0x200) == 0x20200);
-    // assert(tlb_peek(0) == 1);
-    // assert(tlb_peek(0x200) == 1);
-    // assert(tlb_translate(0x1200) == 0x21200);
-    // assert(tlb_translate(0x5200) == 0x25200);
-    // assert(tlb_translate(0x8200) == 0x28200);
-    // assert(tlb_translate(0x2200) == 0x22200);
-    // assert(tlb_peek(0x1000) == 1);
-    // assert(tlb_peek(0x5000) == 1);
-    // assert(tlb_peek(0x8000) == 1);
-    // assert(tlb_peek(0x2000) == 1);
-    // assert(tlb_peek(0x0000) == 1);
-    // assert(tlb_translate(0x101200) == 0x121200);
-    // assert(tlb_translate(0x801200) == 0x821200);
-    // assert(tlb_translate(0x301200) == 0x321200);
-    // assert(tlb_translate(0x501200) == 0x521200);
-    // assert(tlb_translate(0xA01200) == 0xA21200);
-    // assert(tlb_translate(0xA0001200) == -1);
-    // assert(tlb_peek(0x001200) == 0);
-    // assert(tlb_peek(0x101200) == 0);
-    // assert(tlb_peek(0x301200) == 3);
-    // assert(tlb_peek(0x501200) == 2);
-    // assert(tlb_peek(0x801200) == 4);
-    // assert(tlb_peek(0xA01200) == 1);
-    // assert(tlb_translate(0x301800) == 0x321800);
-    // assert(tlb_peek(0x001000) == 0);
-    // assert(tlb_peek(0x101000) == 0);
-    // assert(tlb_peek(0x301000) == 1);
-    // assert(tlb_peek(0x501000) == 3);
-    // assert(tlb_peek(0x801000) == 4);
-    // assert(tlb_peek(0xA01000) == 2);
+    tlb_clear();
+    assert(tlb_peek(0) == 0);
+    assert(tlb_translate(0) == 0x20000); // works up to here
+    printf("tlb_peek(0) returns: %d \n", tlb_peek(0));
+    printf("tlb_peek(0) returns: %d \n", tlb_peek(0));
+    assert(tlb_peek(0) == 1);
+    assert(tlb_translate(0x200) == 0x20200);
+    assert(tlb_peek(0) == 1);
+    assert(tlb_peek(0x200) == 1);
+    assert(tlb_translate(0x1200) == 0x21200);
+    assert(tlb_translate(0x5200) == 0x25200);
+    assert(tlb_translate(0x8200) == 0x28200);
+    assert(tlb_translate(0x2200) == 0x22200);
+    assert(tlb_peek(0x1000) == 1);
+    assert(tlb_peek(0x5000) == 1);
+    assert(tlb_peek(0x8000) == 1);
+    assert(tlb_peek(0x2000) == 1);
+    assert(tlb_peek(0x0000) == 1);
+    assert(tlb_translate(0x101200) == 0x121200);
+    assert(tlb_translate(0x801200) == 0x821200);
+    assert(tlb_translate(0x301200) == 0x321200);
+    assert(tlb_translate(0x501200) == 0x521200);
+    assert(tlb_translate(0xA01200) == 0xA21200);
+    assert(tlb_translate(0xA0001200) == -1);
+    assert(tlb_peek(0x001200) == 0);
+    assert(tlb_peek(0x101200) == 0);
+    assert(tlb_peek(0x301200) == 3);
+    assert(tlb_peek(0x501200) == 2);
+    assert(tlb_peek(0x801200) == 4);
+    assert(tlb_peek(0xA01200) == 1);
+    assert(tlb_translate(0x301800) == 0x321800);
+    assert(tlb_peek(0x001000) == 0);
+    assert(tlb_peek(0x101000) == 0);
+    assert(tlb_peek(0x301000) == 1);
+    assert(tlb_peek(0x501000) == 3);
+    assert(tlb_peek(0x801000) == 4);
+    assert(tlb_peek(0xA01000) == 2);
 }
