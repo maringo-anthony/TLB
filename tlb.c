@@ -127,7 +127,12 @@ size_t tlb_translate(size_t va)
     }
 
     // if it wasnt in the TLB look it up then add it to the TLB
-    size_t physicalAddr = translate(va);
+
+    // append the page offset to the physical page number after translating
+    size_t andZeros = (0xFFFFFFFFFFFFFFFF >> POBITS) << POBITS;
+    size_t curPoBits = va & ~andZeros;
+    size_t physicalAddr = translate(va & andZeros) | curPoBits;
+
     if (physicalAddr != -1)
     {
         CacheLine *newCacheLine = malloc(sizeof(CacheLine));
@@ -142,7 +147,6 @@ size_t tlb_translate(size_t va)
 
         // add the new cache line to the cache and evict something the LRU cache line
 
-        // TODO get the correct LRU cache line
         // find the LRU cache line
         for (int i = 0; i < WAYS; i++)
         {
